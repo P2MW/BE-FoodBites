@@ -4,7 +4,7 @@ import com.p2mw.foodbites.model.User;
 
 public interface UserService {
 
-    User findByFullName(String fullName);
+    User getUserByEmail(String email);
 
-    User save(User user);
+    User createUser(User user);
 }

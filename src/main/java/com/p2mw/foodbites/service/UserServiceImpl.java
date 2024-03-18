@@ -11,13 +11,14 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+
     @Override
-    public User findByFullName(String fullName) {
-        return userRepository.findByFullName(fullName);
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     @Override
-    public User save(User user) {
+    public User createUser(User user) {
         return userRepository.save(user);
     }
 }

@@ -12,12 +12,17 @@ public class SellerServiceImpl implements SellerService{
     private SellerRepository sellerRepository;
 
     @Override
+    public Seller findByEmail(String email) {
+        return sellerRepository.findByEmail(email);
+    }
+
+    @Override
     public Seller findByMerchantName(String merchantName) {
         return sellerRepository.findByMerchantName(merchantName);
     }
 
     @Override
-    public Seller save(Seller seller) {
+    public Seller createSeller(Seller seller) {
         return sellerRepository.save(seller);
     }
 }

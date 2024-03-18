@@ -4,7 +4,7 @@ import com.p2mw.foodbites.model.Seller;
 
 public interface SellerService {
 
+    Seller findByEmail(String email);
     Seller findByMerchantName(String merchantName);
-
-    Seller save(Seller seller);
+    Seller createSeller(Seller seller);
 }

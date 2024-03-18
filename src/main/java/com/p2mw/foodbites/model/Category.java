@@ -1,5 +1,6 @@
 package com.p2mw.foodbites.model;
 
+import com.p2mw.foodbites.enumeration.ECategory;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,17 +10,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Product {
-
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String name;
-    private double price;
-    private String description;
-    private String image;
 
-    @ManyToOne
-    @JoinColumn(referencedColumnName = "id", nullable = false)
-    private Seller seller;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ECategory name;
 }
