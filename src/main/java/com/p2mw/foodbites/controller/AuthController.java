@@ -1,10 +1,12 @@
 package com.p2mw.foodbites.controller;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.p2mw.foodbites.dto.request.LoginRequest;
 import com.p2mw.foodbites.dto.request.SellerSignupRequest;
 import com.p2mw.foodbites.dto.response.JwtResponse;
 import com.p2mw.foodbites.dto.response.MessageResponse;
-import com.p2mw.foodbites.enumeration.ECategory;
+import com.p2mw.foodbites.model.Admin;
 import com.p2mw.foodbites.model.Seller;
 import com.p2mw.foodbites.model.Category;
 import com.p2mw.foodbites.model.User;
@@ -24,7 +26,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -48,6 +52,9 @@ public class AuthController {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -82,8 +89,16 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+    @PostMapping("/signup/admin")
+    public ResponseEntity<?> registerAdmin(@RequestBody Admin admin){
+        admin.setPassword(encoder.encode(admin.getPassword()));
+        adminService.createAdmin(admin);
+
+        return ResponseEntity.ok(new MessageResponse("Admin registered successfully"));
+    }
+
     @PostMapping("/signup/seller")
-    public ResponseEntity<?> registerSeller(@RequestBody SellerSignupRequest sellerSignupRequest) {
+    public ResponseEntity<?> registerSeller(@ModelAttribute SellerSignupRequest sellerSignupRequest) {
         Seller seller = modelMapper.map(sellerSignupRequest, Seller.class);
         Category category = categoryRepository.findById(sellerSignupRequest.getCategoryId()).get();
 
@@ -98,6 +113,20 @@ public class AuthController {
                     .badRequest()
                     .body(new MessageResponse("Error: merchantName is already taken!"));
         }
+
+        if (sellerSignupRequest.getProfilePicture() != null && !sellerSignupRequest.getProfilePicture().isEmpty()) {
+            try {
+                Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                        sellerSignupRequest.getProfilePicture().getBytes(),
+                        ObjectUtils.emptyMap());
+                String imageUrl = uploadResult.get("url").toString();
+                seller.setProfilePicture(imageUrl);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
 
         seller.setPassword(encoder.encode(seller.getPassword()));
         seller.setCategory(category);

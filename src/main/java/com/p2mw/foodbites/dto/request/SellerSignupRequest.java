@@ -1,6 +1,7 @@
 package com.p2mw.foodbites.dto.request;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 
@@ -16,6 +17,6 @@ public class SellerSignupRequest {
     private String phoneNumber;
     private String address;
     private String orderingProcess;
-    private String profilePicture;
+    private MultipartFile profilePicture;
     private String description;
 }
