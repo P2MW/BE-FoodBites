@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,6 +29,9 @@ public class SellerServiceImpl implements SellerService{
 
     @Autowired
     private Cloudinary cloudinary;
+
+    @Autowired
+    private PasswordEncoder endcoder;
 
     @Override
     public Seller findByEmail(String email) {
@@ -56,7 +60,7 @@ public class SellerServiceImpl implements SellerService{
             updateSeller.setCategory(category);
             updateSeller.setEmail(editProfileSellerRequest.getEmail());
             updateSeller.setPhoneNumber(editProfileSellerRequest.getPhoneNumber());
-            updateSeller.setPassword(editProfileSellerRequest.getPassword());
+            updateSeller.setPassword(endcoder.encode(editProfileSellerRequest.getPassword()));
             updateSeller.setAddress(editProfileSellerRequest.getAddress());
             updateSeller.setDescription(editProfileSellerRequest.getDescription());
             updateSeller.setOrderingProcess(editProfileSellerRequest.getOrderingProcess());

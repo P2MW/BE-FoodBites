@@ -15,7 +15,7 @@ public class SellerController {
     @Autowired
     private SellerService sellerService;
 
-    @PostMapping("/update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Seller> updateSeller(@PathVariable long id, @ModelAttribute EditProfileSellerRequest editProfileSellerRequest){
         Seller updatedSeller = sellerService.updateSeller(id, editProfileSellerRequest);
         if (updatedSeller != null){
