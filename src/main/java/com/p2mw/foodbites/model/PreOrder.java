@@ -21,7 +21,7 @@ public class PreOrder {
     private User user;
 
     @ManyToOne
-    private Product product;
+    private Menu menu;
 
     @ManyToOne
     private Payment payment;

@@ -9,15 +9,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Product {
+public class Menu {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String name;
+    private String menuName;
     private double price;
     private String description;
     private String image;
+    private String minimumOrder;
 
     @ManyToOne
     @JoinColumn(referencedColumnName = "id", nullable = false)
