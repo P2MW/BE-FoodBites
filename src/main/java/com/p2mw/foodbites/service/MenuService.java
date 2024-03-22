@@ -12,4 +12,5 @@ public interface MenuService {
     MenuResponse addMenu(MenuRequest menuRequest);
     MenuResponse updateMenu(long id, MenuRequest menuRequest);
     void deleteMenu(long id);
+    List<MenuResponse> getMenuByMenuName(String menuName);
 }

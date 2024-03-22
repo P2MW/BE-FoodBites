@@ -90,4 +90,9 @@ public class MenuServiceImpl implements MenuService{
         menuRepository.delete(deletedMenu);
 
     }
+
+    @Override
+    public List<MenuResponse> getMenuByMenuName(String menuName) {
+        return menuRepository.findByMenuName(menuName);
+    }
 }
