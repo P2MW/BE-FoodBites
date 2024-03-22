@@ -3,20 +3,24 @@ package com.p2mw.foodbites.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.p2mw.foodbites.dto.request.EditProfileSellerRequest;
+import com.p2mw.foodbites.dto.response.SellerResponse;
+import com.p2mw.foodbites.enumeration.ECategory;
 import com.p2mw.foodbites.model.Category;
 import com.p2mw.foodbites.model.Seller;
 import com.p2mw.foodbites.repository.CategoryRepository;
 import com.p2mw.foodbites.repository.SellerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class SellerServiceImpl implements SellerService{
@@ -80,5 +84,25 @@ public class SellerServiceImpl implements SellerService{
         }
 
         return sellerRepository.save(updateSeller);
+    }
+
+    @Override
+    public List<SellerResponse> getAllSeller() {
+        List<Seller> sellers = sellerRepository.findAll();
+        return sellers.stream()
+                .map(SellerResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Stream<SellerResponse> getSellerById(long id) {
+        Optional<Seller> seller = sellerRepository.findById(id);
+        return seller.stream()
+                .map(SellerResponse::new);
+    }
+
+    @Override
+    public List<SellerResponse> getByCategoryName(String categoryName) {
+        return sellerRepository.findByCategory(ECategory.valueOf(categoryName.toUpperCase()));
     }
 }
