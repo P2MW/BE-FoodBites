@@ -38,6 +38,11 @@ public class SellerServiceImpl implements SellerService{
     private PasswordEncoder endcoder;
 
     @Override
+    public Optional<Seller> findById(long id) {
+        return sellerRepository.findById(id);
+    }
+
+    @Override
     public Seller findByEmail(String email) {
         return sellerRepository.findByEmail(email);
     }
