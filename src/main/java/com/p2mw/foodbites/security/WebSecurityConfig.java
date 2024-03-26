@@ -1,11 +1,13 @@
 package com.p2mw.foodbites.security;
 
+import com.p2mw.foodbites.model.User;
 import com.p2mw.foodbites.security.jwt.AuthEntryPointJwt;
 import com.p2mw.foodbites.security.jwt.AuthTokenFilter;
 import com.p2mw.foodbites.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -20,10 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableMethodSecurity
-// (securedEnabled = true,
-// jsr250Enabled = true,
-// prePostEnabled = true) // by default
-public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig {
+
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
@@ -59,13 +59,28 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionFixation().none()) //menonaktifkan penanganan sesi
+
                 .authorizeHttpRequests(auth ->
-                        auth.anyRequest().permitAll()
+                        auth.requestMatchers("api/auth/**",
+                                "api/menu",
+                                "api/menu/search",
+                                "api/seller/{sellerId}/average-rating",
+                                "api/seller/{sellerId}/allratings",
+                                "api/seller/{id}",
+                                "api/seller/category/{categoryName}").permitAll()
+                                .requestMatchers("api/seller/{sellerId}/rating",
+                                        "api/user/edit-profile").hasAuthority("ROLE_USER")
+                                .requestMatchers("api/seller/edit-profile",
+                                        "api/menu/add",
+                                        "api/menu/update/{id}",
+                                        "api/menu/delete/{id}").hasAuthority("ROLE_SELLER")
+                                .anyRequest().authenticated()
                 );
 
         http.authenticationProvider(authenticationProvider());
-
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

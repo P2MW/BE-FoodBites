@@ -3,11 +3,15 @@ package com.p2mw.foodbites.security.jwt;
 import java.security.Key;
 import java.util.Date;
 
+import com.p2mw.foodbites.model.User;
+import com.p2mw.foodbites.repository.UserRepository;
 import com.p2mw.foodbites.service.UserDetailsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.*;
@@ -29,7 +33,7 @@ public class JwtUtils {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername()))
+                .setSubject((userPrincipal.getEmail()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)
@@ -40,9 +44,13 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    public String getUserNameFromJwtToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key()).build()
-                .parseClaimsJws(token).getBody().getSubject();
+    public String getUsernameFromJwtToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     public boolean validateJwtToken(String authToken) {

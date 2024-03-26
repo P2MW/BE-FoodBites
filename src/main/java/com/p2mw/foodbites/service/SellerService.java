@@ -14,7 +14,7 @@ public interface SellerService {
     Seller findByEmail(String email);
     Seller findByMerchantName(String merchantName);
     Seller createSeller(Seller seller);
-    Seller updateSeller(long id, EditProfileSellerRequest editProfileSellerRequest);
+    Seller updateSeller(EditProfileSellerRequest editProfileSellerRequest);
     List<SellerResponse> getAllSeller();
     Stream<SellerResponse> getSellerById(long id);
     List<SellerResponse> getByCategoryName(String categoryName);

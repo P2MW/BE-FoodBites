@@ -9,10 +9,14 @@ import com.p2mw.foodbites.model.Category;
 import com.p2mw.foodbites.model.Seller;
 import com.p2mw.foodbites.repository.CategoryRepository;
 import com.p2mw.foodbites.repository.SellerRepository;
+import com.p2mw.foodbites.security.jwt.JwtTokenExtractor;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -37,6 +41,9 @@ public class SellerServiceImpl implements SellerService{
     @Autowired
     private PasswordEncoder endcoder;
 
+    @Autowired
+    private JwtTokenExtractor jwtTokenExtractor;
+
     @Override
     public Optional<Seller> findById(long id) {
         return sellerRepository.findById(id);
@@ -58,9 +65,22 @@ public class SellerServiceImpl implements SellerService{
     }
 
     @Override
-    public Seller updateSeller(long id, EditProfileSellerRequest editProfileSellerRequest) {
-        Seller updateSeller = sellerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seller not found"));
+    public Seller updateSeller(EditProfileSellerRequest editProfileSellerRequest) {
+
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
+        // Membaca token dari cookie
+        String jwtToken = jwtTokenExtractor.extractJwtTokenFromCookie(request);
+
+        // Validasi token, lalu ambil email pengguna dari token
+        String sellerEmail = jwtTokenExtractor.getEmailFromJwtToken(jwtToken);
+
+
+        Seller updateSeller = sellerRepository.findByEmail(sellerEmail);
+        if (updateSeller == null) {
+            throw new RuntimeException("Seller not found");
+        }
+
         Category category = categoryRepository.findById(editProfileSellerRequest.getCategoryId()).get();
 
         if (updateSeller != null){

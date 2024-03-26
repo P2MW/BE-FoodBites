@@ -24,9 +24,9 @@ public class SellerController {
         return sellerService.getAllSeller();
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Seller> updateSeller(@PathVariable long id, @ModelAttribute EditProfileSellerRequest editProfileSellerRequest){
-        Seller updatedSeller = sellerService.updateSeller(id, editProfileSellerRequest);
+    @PutMapping("/edit-profile/")
+    public ResponseEntity<Seller> updateSeller(@ModelAttribute EditProfileSellerRequest editProfileSellerRequest){
+        Seller updatedSeller = sellerService.updateSeller(editProfileSellerRequest);
         if (updatedSeller != null){
             return ResponseEntity.ok(updatedSeller);
         } else{

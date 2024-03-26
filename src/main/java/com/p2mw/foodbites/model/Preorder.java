@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class PreOrder {
+public class Preorder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

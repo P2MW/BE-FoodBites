@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/seller")
 public class RatingReviewController {
 
     @Autowired
     private RatingReviewService ratingReviewService;
 
-    @PostMapping("/seller/{sellerId}/rating")
+    @PostMapping("/{sellerId}/rating")
     public ResponseEntity<RatingReviewResponse> rateAndReviewSeller(
             @PathVariable long sellerId,
             @RequestParam int rating,
@@ -29,13 +29,13 @@ public class RatingReviewController {
     }
 
 
-    @GetMapping("/seller/{sellerId}/average-rating")
+    @GetMapping("/{sellerId}/average-rating")
     public ResponseEntity<Double> calculateAverageRating(@PathVariable long sellerId) {
         double averageRating = ratingReviewService.calculateAverageRating(sellerId);
         return new ResponseEntity<>(averageRating, HttpStatus.OK);
     }
 
-    @GetMapping("/seller/{sellerId}/ratings")
+    @GetMapping("/{sellerId}/allratings")
     public ResponseEntity<List<RatingReviewResponse>> getAllRatingReviews(@PathVariable long sellerId) {
         List<RatingReview> ratingReviews = ratingReviewService.getAllRatingReviews(sellerId);
         List<RatingReviewResponse> responseList = ratingReviews.stream()

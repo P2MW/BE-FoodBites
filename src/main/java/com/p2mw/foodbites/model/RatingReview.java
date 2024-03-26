@@ -18,13 +18,14 @@ public class RatingReview {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(referencedColumnName = "id")
     private User user;
 
     @ManyToOne
+    @JoinColumn(referencedColumnName = "id")
     private Seller seller;
 
     private int rating;
     private String review;
     private LocalDateTime date;
-
 }

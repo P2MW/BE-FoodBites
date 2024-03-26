@@ -1,138 +1,47 @@
 package com.p2mw.foodbites.controller;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import com.p2mw.foodbites.dto.request.LoginRequest;
 import com.p2mw.foodbites.dto.request.SellerSignupRequest;
 import com.p2mw.foodbites.dto.response.JwtResponse;
-import com.p2mw.foodbites.dto.response.MessageResponse;
 import com.p2mw.foodbites.model.Admin;
 import com.p2mw.foodbites.model.Seller;
-import com.p2mw.foodbites.model.Category;
 import com.p2mw.foodbites.model.User;
-import com.p2mw.foodbites.repository.CategoryRepository;
-import com.p2mw.foodbites.security.jwt.JwtUtils;
-import com.p2mw.foodbites.service.AdminService;
-import com.p2mw.foodbites.service.SellerService;
-import com.p2mw.foodbites.service.UserDetailsImpl;
-import com.p2mw.foodbites.service.UserService;
-import org.modelmapper.ModelMapper;
+import com.p2mw.foodbites.service.AuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private SellerService sellerService;
-
-    @Autowired
-    private AdminService adminService;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private JwtUtils jwtUtils;
-
-    @Autowired
-    private Cloudinary cloudinary;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
-    private PasswordEncoder encoder;
+    private AuthService authService;
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), userDetails.getAuthorities()));
+    public ResponseEntity<JwtResponse> authenticateUser(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+        JwtResponse jwtResponse = authService.authenticateUser(loginRequest, response);
+        return ResponseEntity.ok(jwtResponse);
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
-        if (userService.getUserByEmail(user.getEmail()) != null) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: email is already taken!"));
-        }
-        user.setPassword(encoder.encode(user.getPassword()));
-        userService.createUser(user);
-
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    @PostMapping("/signup/user")
+    public ResponseEntity<User> registerUser(@RequestBody User user) {
+        User registeredUser = authService.registerUser(user);
+        return ResponseEntity.ok(registeredUser);
     }
 
     @PostMapping("/signup/admin")
-    public ResponseEntity<?> registerAdmin(@RequestBody Admin admin){
-        admin.setPassword(encoder.encode(admin.getPassword()));
-        adminService.createAdmin(admin);
-
-        return ResponseEntity.ok(new MessageResponse("Admin registered successfully"));
+    public ResponseEntity<Admin> registerAdmin(@RequestBody Admin admin) {
+        Admin registeredAdmin = authService.registerAdmin(admin);
+        return ResponseEntity.ok(registeredAdmin);
     }
 
     @PostMapping("/signup/seller")
-    public ResponseEntity<?> registerSeller(@ModelAttribute SellerSignupRequest sellerSignupRequest) {
-        Seller seller = modelMapper.map(sellerSignupRequest, Seller.class);
-        Category category = categoryRepository.findById(sellerSignupRequest.getCategoryId()).get();
-
-        if (sellerService.findByEmail(sellerSignupRequest.getEmail()) != null) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: email is already taken!"));
-        }
-
-        if (sellerService.findByMerchantName(sellerSignupRequest.getMerchantName()) != null) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: merchantName is already taken!"));
-        }
-
-        if (sellerSignupRequest.getProfilePicture() != null && !sellerSignupRequest.getProfilePicture().isEmpty()) {
-            try {
-                Map<?, ?> uploadResult = cloudinary.uploader().upload(
-                        sellerSignupRequest.getProfilePicture().getBytes(),
-                        ObjectUtils.emptyMap());
-                String imageUrl = uploadResult.get("url").toString();
-                seller.setProfilePicture(imageUrl);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        seller.setPassword(encoder.encode(seller.getPassword()));
-        seller.setCategory(category);
-        sellerService.createSeller(seller);
-
-        return ResponseEntity.ok(new MessageResponse("Seller registered successfully!"));
+    public ResponseEntity<Seller> registerSeller(@ModelAttribute SellerSignupRequest sellerSignupRequest) {
+        Seller registeredSeller = authService.registerSeller(sellerSignupRequest);
+        return ResponseEntity.ok(registeredSeller);
     }
-
 }
+
+
